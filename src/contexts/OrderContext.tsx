@@ -2,11 +2,22 @@
 import React, { createContext, useContext, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
+interface CartItem {
+  id: string;
+  productId: string;
+  storeId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  storeName: string;
+}
+
 interface Order {
   id: string;
   storeId: string;
   storeName: string;
-  items: any[];
+  items: CartItem[];
   subtotal: number;
   deliveryFee: number;
   total: number;
@@ -24,7 +35,7 @@ interface MasterOrder {
 
 interface OrderContextType {
   currentOrder: MasterOrder | null;
-  createOrder: (cartItems: any[]) => Promise<void>;
+  createOrder: (cartItems: CartItem[]) => Promise<void>;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
 }
 
@@ -41,7 +52,7 @@ export const useOrderContext = () => {
 export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentOrder, setCurrentOrder] = useState<MasterOrder | null>(null);
 
-  const createOrder = async (cartItems: any[]) => {
+  const createOrder = async (cartItems: CartItem[]) => {
     try {
       // Agrupar itens por loja
       const itemsByStore = cartItems.reduce((acc, item) => {
@@ -50,7 +61,7 @@ export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         }
         acc[item.storeId].push(item);
         return acc;
-      }, {} as { [storeId: string]: any[] });
+      }, {} as { [storeId: string]: CartItem[] });
 
       const orders: Order[] = [];
       let totalAmount = 0;
