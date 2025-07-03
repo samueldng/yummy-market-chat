@@ -1,6 +1,6 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import React, { createContext, useContext, useState } from 'react';
+import { processWithGemini } from '@/lib/gemini';
 
 interface ChatMessage {
   id: string;
@@ -15,6 +15,8 @@ interface ChatMessage {
 interface ChatContextType {
   messages: ChatMessage[];
   isLoading: boolean;
+  apiKey: string;
+  setApiKey: (key: string) => void;
   sendMessage: (message: string) => Promise<void>;
   clearChat: () => void;
 }
@@ -30,10 +32,31 @@ export const useChatContext = () => {
 };
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: 'Olá! Sou seu assistente do FoodHub. Como posso ajudar você hoje?',
+      timestamp: new Date(),
+      intent: 'saudacao',
+      suggestions: ['Quero uma pizza', 'Ver açaiterias', 'Buscar hambúrguer']
+    }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
 
   const sendMessage = async (message: string) => {
+    if (!apiKey.trim()) {
+      const errorMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: 'Por favor, configure sua chave da API do Gemini primeiro.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
     setIsLoading(true);
     
     const userMessage: ChatMessage = {
@@ -46,8 +69,9 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      // Aqui será integrada a API do Gemini
-      const response = await processMessageWithGemini(message);
+      console.log('Enviando mensagem para Gemini:', message);
+      const response = await processWithGemini(message, apiKey);
+      console.log('Resposta do Gemini:', response);
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -61,12 +85,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error processing message:', error);
+      console.error('Erro ao processar mensagem:', error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Desculpe, ocorreu um erro. Tente novamente.',
+        content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Verifique sua chave da API e tente novamente.',
         timestamp: new Date(),
+        suggestions: ['Tentar novamente', 'Verificar API key']
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -74,34 +99,25 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const processMessageWithGemini = async (message: string) => {
-    // Simulação da resposta da IA - será substituída pela API real do Gemini
-    const responses = [
-      {
-        intent: 'descobrir_lojas',
-        message: 'Encontrei algumas opções incríveis para você! Que tal dar uma olhada nestas pizzarias populares?',
-        data: { storeType: 'pizzaria' },
-        suggestions: ['Ver cardápio', 'Localização', 'Horário de funcionamento']
-      },
-      {
-        intent: 'adicionar_item',
-        message: 'Ótima escolha! Adicionei a pizza de calabresa ao seu carrinho. Quer algo para beber também?',
-        data: { productId: '1', quantity: 1 },
-        suggestions: ['Adicionar bebida', 'Ver carrinho', 'Continuar comprando']
-      }
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
   const clearChat = () => {
-    setMessages([]);
+    setMessages([
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: 'Olá! Sou seu assistente do FoodHub. Como posso ajudar você hoje?',
+        timestamp: new Date(),
+        intent: 'saudacao',
+        suggestions: ['Quero uma pizza', 'Ver açaiterias', 'Buscar hambúrguer']
+      }
+    ]);
   };
 
   return (
     <ChatContext.Provider value={{
       messages,
       isLoading,
+      apiKey,
+      setApiKey,
       sendMessage,
       clearChat,
     }}>

@@ -3,15 +3,22 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MessageCircle, Bot, User } from 'lucide-react';
+import { Send, MessageCircle, Bot, User, Settings, Eye, EyeOff } from 'lucide-react';
 import { useChatContext } from '@/contexts/ChatContext';
 import ProductCarousel from '@/components/ProductCarousel';
 
 const ChatInterface = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const { messages, isLoading, sendMessage } = useChatContext();
+  const [showSettings, setShowSettings] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState('');
+  const { messages, isLoading, apiKey, setApiKey, sendMessage, clearChat } = useChatContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTempApiKey(apiKey);
+  }, [apiKey]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,8 +42,13 @@ const ChatInterface = () => {
     }
   };
 
+  const handleSaveApiKey = () => {
+    setApiKey(tempApiKey);
+    setShowSettings(false);
+  };
+
   const renderMessageContent = (message: any) => {
-    if (message.intent === 'descobrir_lojas' && message.data) {
+    if (message.intent === 'descobrir_lojas' && message.data?.storeType) {
       return (
         <div className="space-y-3">
           <p>{message.content}</p>
@@ -44,7 +56,7 @@ const ChatInterface = () => {
         </div>
       );
     }
-    return <p>{message.content}</p>;
+    return <p className="text-sm leading-relaxed">{message.content}</p>;
   };
 
   return (
@@ -60,32 +72,80 @@ const ChatInterface = () => {
 
       {/* Chat Interface */}
       {isOpen && (
-        <Card className="fixed bottom-24 right-6 w-96 h-96 flex flex-col shadow-2xl z-40 animate-scale-in">
+        <Card className="fixed bottom-24 right-6 w-96 h-[500px] flex flex-col shadow-2xl z-40 animate-scale-in">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-t-lg py-3">
-            <CardTitle className="flex items-center text-lg">
-              <Bot className="h-5 w-5 mr-2" />
-              Assistente FoodHub
+            <CardTitle className="flex items-center justify-between text-lg">
+              <div className="flex items-center">
+                <Bot className="h-5 w-5 mr-2" />
+                Assistente FoodHub
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
+          
+          {/* Settings Panel */}
+          {showSettings && (
+            <div className="p-4 border-b bg-gray-50">
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">
+                  Chave da API Gemini:
+                </label>
+                <div className="flex space-x-2">
+                  <div className="relative flex-1">
+                    <Input
+                      type={showApiKey ? "text" : "password"}
+                      value={tempApiKey}
+                      onChange={(e) => setTempApiKey(e.target.value)}
+                      placeholder="Cole sua API key do Google Gemini aqui"
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                    >
+                      {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button size="sm" onClick={handleSaveApiKey} className="flex-1">
+                    Salvar
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={clearChat}>
+                    Limpar Chat
+                  </Button>
+                </div>
+                {!apiKey && (
+                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                    Configure sua API key do Gemini para usar o chat
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
           
           <CardContent className="flex-1 flex flex-col p-0">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.length === 0 && (
-                <div className="text-center text-gray-500 py-8">
-                  <Bot className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Olá! Como posso ajudar você hoje?</p>
-                  <p className="text-sm mt-2">Tente: "Quero uma pizza de calabresa"</p>
-                </div>
-              )}
-              
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[85%] p-3 rounded-lg ${
                       message.role === 'user'
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-100 text-gray-800'
@@ -95,21 +155,19 @@ const ChatInterface = () => {
                       {message.role === 'assistant' && (
                         <Bot className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       )}
-                      {message.role === 'user' && (
-                        <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      )}
                       <div className="flex-1">
                         {renderMessageContent(message)}
                         
-                        {message.suggestions && (
-                          <div className="mt-2 space-y-1">
+                        {message.suggestions && message.suggestions.length > 0 && (
+                          <div className="mt-3 space-y-1">
                             {message.suggestions.map((suggestion, index) => (
                               <Button
                                 key={index}
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs h-6 text-blue-600 hover:text-blue-800"
+                                className="text-xs h-7 text-blue-600 hover:text-blue-800 hover:bg-blue-50 mr-1 mb-1"
                                 onClick={() => sendMessage(suggestion)}
+                                disabled={isLoading}
                               >
                                 {suggestion}
                               </Button>
@@ -147,13 +205,13 @@ const ChatInterface = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Digite sua mensagem..."
-                  disabled={isLoading}
+                  placeholder={apiKey ? "Digite sua mensagem..." : "Configure a API key primeiro..."}
+                  disabled={isLoading || !apiKey}
                   className="flex-1"
                 />
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isLoading}
+                  disabled={!inputValue.trim() || isLoading || !apiKey}
                   size="icon"
                 >
                   <Send className="h-4 w-4" />
