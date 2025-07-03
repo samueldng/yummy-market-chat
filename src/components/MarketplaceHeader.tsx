@@ -1,52 +1,52 @@
 
 import React from 'react';
-import { ShoppingCart, MessageCircle, User, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useCartContext } from '@/contexts/CartContext';
+import { ShoppingCart, MessageCircle, Search, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MarketplaceHeader = () => {
-  const { totalItems } = useCartContext();
+  const navigate = useNavigate();
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-white shadow-sm border-b sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-4">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               FoodHub
             </h1>
           </div>
-
-          <div className="flex-1 max-w-lg mx-8">
-            <div className="relative">
+          
+          <div className="hidden md:flex items-center space-x-4 flex-1 max-w-md mx-8">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input 
-                placeholder="Buscar lojas, pratos ou produtos..." 
-                className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+              <input
+                type="text"
+                placeholder="Buscar lojas, produtos..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/chat')}
+              className="relative hover:bg-orange-50 hover:text-orange-600"
+            >
               <MessageCircle className="h-5 w-5" />
-              <span className="ml-2 hidden sm:inline">Chat</span>
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                •
+              </span>
             </Button>
             
-            <Button variant="ghost" size="sm" className="relative">
+            <Button variant="ghost" size="icon" className="hover:bg-orange-50 hover:text-orange-600">
               <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-              <span className="ml-2 hidden sm:inline">Carrinho</span>
             </Button>
-
-            <Button variant="ghost" size="sm">
+            
+            <Button variant="ghost" size="icon" className="hover:bg-orange-50 hover:text-orange-600">
               <User className="h-5 w-5" />
-              <span className="ml-2 hidden sm:inline">Perfil</span>
             </Button>
           </div>
         </div>
