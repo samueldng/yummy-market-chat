@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MessageCircle, Bot, User, Settings, Eye, EyeOff } from 'lucide-react';
+import { Send, MessageCircle, Bot, Settings, Eye, EyeOff } from 'lucide-react';
 import { useChatContext } from '@/contexts/ChatContext';
 import ProductCarousel from '@/components/ProductCarousel';
 
@@ -67,13 +67,13 @@ const ChatInterface = () => {
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg z-50"
         size="icon"
       >
-        <MessageCircle className="h-6 w-6" />
+        <MessageCircle className="h-6 w-6 text-white" />
       </Button>
 
       {/* Chat Interface */}
       {isOpen && (
-        <Card className="fixed bottom-24 right-6 w-96 h-[500px] flex flex-col shadow-2xl z-40 animate-scale-in">
-          <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-t-lg py-3">
+        <Card className="fixed bottom-24 right-6 w-96 h-[500px] flex flex-col shadow-2xl z-50 animate-scale-in bg-white border">
+          <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-t-lg py-3 flex-shrink-0">
             <CardTitle className="flex items-center justify-between text-lg">
               <div className="flex items-center">
                 <Bot className="h-5 w-5 mr-2" />
@@ -94,7 +94,7 @@ const ChatInterface = () => {
           
           {/* Settings Panel */}
           {showSettings && (
-            <div className="p-4 border-b bg-gray-50">
+            <div className="p-4 border-b bg-gray-50 flex-shrink-0">
               <div className="space-y-3">
                 <label className="text-sm font-medium text-gray-700">
                   Chave da API Gemini:
@@ -106,7 +106,7 @@ const ChatInterface = () => {
                       value={tempApiKey}
                       onChange={(e) => setTempApiKey(e.target.value)}
                       placeholder="Cole sua API key do Google Gemini aqui"
-                      className="pr-10"
+                      className="pr-10 bg-white"
                     />
                     <Button
                       type="button"
@@ -136,24 +136,24 @@ const ChatInterface = () => {
             </div>
           )}
           
-          <CardContent className="flex-1 flex flex-col p-0">
+          <CardContent className="flex-1 flex flex-col p-0 bg-white overflow-hidden">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] p-3 rounded-lg ${
+                    className={`max-w-[85%] p-3 rounded-lg shadow-sm ${
                       message.role === 'user'
                         ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-800'
+                        : 'bg-white text-gray-800 border'
                     }`}
                   >
                     <div className="flex items-start space-x-2">
                       {message.role === 'assistant' && (
-                        <Bot className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <Bot className="h-4 w-4 mt-0.5 flex-shrink-0 text-orange-500" />
                       )}
                       <div className="flex-1">
                         {renderMessageContent(message)}
@@ -165,7 +165,7 @@ const ChatInterface = () => {
                                 key={index}
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs h-7 text-blue-600 hover:text-blue-800 hover:bg-blue-50 mr-1 mb-1"
+                                className="text-xs h-7 text-blue-600 hover:text-blue-800 hover:bg-blue-50 mr-1 mb-1 bg-blue-50/50"
                                 onClick={() => sendMessage(suggestion)}
                                 disabled={isLoading}
                               >
@@ -182,9 +182,9 @@ const ChatInterface = () => {
               
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 p-3 rounded-lg">
+                  <div className="bg-white p-3 rounded-lg border shadow-sm">
                     <div className="flex items-center space-x-2">
-                      <Bot className="h-4 w-4" />
+                      <Bot className="h-4 w-4 text-orange-500" />
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-100"></div>
@@ -199,7 +199,7 @@ const ChatInterface = () => {
             </div>
 
             {/* Input */}
-            <div className="border-t p-4">
+            <div className="border-t p-4 bg-white flex-shrink-0">
               <div className="flex space-x-2">
                 <Input
                   value={inputValue}
@@ -207,12 +207,13 @@ const ChatInterface = () => {
                   onKeyPress={handleKeyPress}
                   placeholder={apiKey ? "Digite sua mensagem..." : "Configure a API key primeiro..."}
                   disabled={isLoading || !apiKey}
-                  className="flex-1"
+                  className="flex-1 bg-white"
                 />
                 <Button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim() || isLoading || !apiKey}
                   size="icon"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
                 >
                   <Send className="h-4 w-4" />
                 </Button>

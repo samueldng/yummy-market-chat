@@ -1,9 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MessageCircle, Bot, User, Settings, Eye, EyeOff, Mic, MicOff, ArrowLeft, Share2 } from 'lucide-react';
+import { Send, Bot, Settings, Eye, EyeOff, Mic, MicOff, ArrowLeft, Share2 } from 'lucide-react';
 import { useChatContext } from '@/contexts/ChatContext';
 import ProductCarousel from '@/components/ProductCarousel';
 import { useNavigate } from 'react-router-dom';
@@ -55,11 +54,6 @@ const Chat = () => {
     window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
   };
 
-  const handleShareToInstagram = () => {
-    const url = encodeURIComponent(window.location.origin + '/chat');
-    window.open(`https://www.instagram.com/`, '_blank');
-  };
-
   const toggleRecording = () => {
     setIsRecording(!isRecording);
     // Aqui seria implementado o reconhecimento de voz
@@ -80,7 +74,7 @@ const Chat = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 shadow-lg">
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 shadow-lg flex-shrink-0">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center space-x-3">
             <Button
@@ -125,7 +119,7 @@ const Chat = () => {
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className="bg-white border-b shadow-sm animate-slide-down">
+        <div className="bg-white border-b shadow-sm animate-slide-down flex-shrink-0">
           <div className="max-w-4xl mx-auto p-4">
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -164,13 +158,6 @@ const Chat = () => {
                     >
                       WhatsApp
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleShareToInstagram}
-                      className="bg-pink-500 hover:bg-pink-600 text-white flex-1"
-                    >
-                      Instagram
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -196,7 +183,7 @@ const Chat = () => {
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 max-w-4xl mx-auto w-full">
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-full">
           {messages.map((message, index) => (
             <div
               key={message.id}
@@ -273,7 +260,7 @@ const Chat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t shadow-lg p-4">
+      <div className="bg-white border-t shadow-lg p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center space-x-3 bg-gray-50 rounded-full p-2">
             <Input
