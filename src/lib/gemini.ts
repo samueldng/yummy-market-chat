@@ -83,6 +83,18 @@ export const processWithGemini = async (message: string, apiKey: string): Promis
     }
   } catch (error) {
     console.error('Erro na API do Gemini:', error);
+    
+    // Melhor tratamento de erros específicos
+    if (error instanceof Error && error.message.includes('503')) {
+      throw new Error('O serviço do Gemini está temporariamente sobrecarregado. Tente novamente em alguns minutos.');
+    }
+    if (error instanceof Error && error.message.includes('401')) {
+      throw new Error('Chave da API inválida. Verifique sua API key do Gemini.');
+    }
+    if (error instanceof Error && error.message.includes('400')) {
+      throw new Error('Requisição inválida. Verifique os parâmetros enviados.');
+    }
+    
     throw error;
   }
 };
